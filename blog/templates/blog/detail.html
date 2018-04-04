@@ -1,0 +1,110 @@
+{% extends 'blog/blog.html' %}
+
+{% load thumbnail %}
+{% load mptt_tags %}
+
+{% block title %}Blog | {{ post.title }}{% endblock %}
+
+{%  block header %}
+    <div class="post-header">
+        <h2>{{ post.title }} | <span class="post-date small text-secondary text-uppercase">{{ post.published|date:'d N o' }}</span></h2>
+        <h3>by  <a href="{% url 'post_by_author_list' post.author.username %}">{{ post.author.first_name }} {{ post.author.last_name }}</a></h3>
+    </div>
+{% endblock %}
+
+{% block blog_content %}
+    <div class="post-body">
+        {% if post.image %}
+            <img src="{{ post.image|thumbnail_url:'main' }}" class="img-thumbnail rounded float-left mr-2 mb-2">
+        {% endif %}
+        {% autoescape off %}
+            {{ post.content }}
+        {% endautoescape %}
+    </div>
+
+    <div class="post-nav">
+        {% if post.has_previous %}
+            <div class="post-nav-previous">
+               Previous: <a href="{{ post.previous_post.get_absolute_url }}">{{ post.previous_post.title }}</a>
+            </div>
+        {% endif %}
+        {% if post.has_next %}
+            <div class="post-nav-next">
+                Next: <a href="{{ post.next_post.get_absolute_url }}">{{ post.next_post.title }}</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="comments">
+        <div class="row">
+            <div class="col-12">
+                <h3>Comments</h3>
+                {% if request.user.is_authenticated %}
+                    <form action="{% url 'post_add_comment' post.slug %}" method="post">
+                        {% csrf_token %}
+                        <div class="row mb-1">
+                            <label for="{{ comment_form.content.id_for_label }}" class="col-sm-2">Comment</label>
+                            <textarea name="{{ comment_form.content.name }}" id="{{ comment_form.content.id_for_label }}" required class="col"></textarea>
+                        </div>
+                        <div class="row justify-content-end">
+                            <input type="submit" class="col-2">
+                        </div>
+                    </form>
+                {% else %}
+                    <p>You must be logged in to comment</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="comment-tree mt-2">
+            {% recursetree post.comments.all %}
+                <div class="row mb-2">
+                    <div class="card col border-0">
+                        <div class="comment card-body">
+                            <a name="{{ node.id }}"></a>
+                            <h4 class="card-title">{{ node.author.first_name }} {{ node.author.last_name }}</h4>
+                            <h5 class="card-subtitle">{{ node.created|date:'d N o' }}</h5>
+                            {{ node.content|linebreaks }}
+                            <div class="row">
+                                <div class="col">
+                                    <a href="#reply-{{ node.id }}" data-toggle="collapse">Reply</a> |
+                                    <a href="#children-{{ node.id }}" data-toggle="collapse">Hide children</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="comment-reply collapse col-12 mb-2" id="reply-{{ node.id }}">
+                            {% with node as parent %}
+                                {% include 'blog/partials/comment_form.html' %}
+                            {% endwith %}
+                        </div>
+                        {% if not node.is_leaf_node %}
+                            <div class="children pl-5 collapse.show" id="children-{{ node.id }}">
+                                {{ children }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endrecursetree %}
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block blog_sidebar %}
+    {% with post.related_posts as related %}
+        {%  if related %}
+            <div id="related-posts">
+                <h3>Related posts</h3>
+                <ul>
+                    {% for post in related %}
+                        <li>
+                            <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endblock %}

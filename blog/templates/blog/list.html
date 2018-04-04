@@ -1,0 +1,47 @@
+{% extends 'blog/blog.html' %}
+
+{% load thumbnail %}
+
+{% block blog_content %}
+    <div class="posts">
+        {% for post in posts %}
+            <div class="post card mb-5">
+                <div class="card-body">
+                    {% if post.image %}
+                        <img src="{{ post.image|thumbnail_url:'preview' }}" class="img-thumbnail rounded float-left mr-2 mb-2">
+                    {% endif %}
+                    <div class="post-heading card-title">
+                        <h2 class="post-title"><a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a></h2>
+                        <p>Posted {{ post.published|date:'d N o' }} by <a href="{% url 'post_by_author_list' post.author.username %}">{{ post.author.first_name }} {{ post.author.last_name }}</a></p>
+                    </div>
+                    <div class="post-body">
+                        {% autoescape off %}
+                            {% if post.excerpt %}
+                                {{ post.excerpt }}
+                            {% else %}
+                                {{ post.content|truncatewords_html:120 }}
+                            {% endif %}
+                            <a href="{{ post.get_absolute_url }}">More...</a>
+                        {% endautoescape %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="{% url 'post_list' %}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="{% url 'post_list' %}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+{% endblock %}
+

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12 mb-5">
+            {% block header %}{% endblock %}
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-8" id="blog">
+            {% block blog_content %}
+            {% endblock %}
+        </div>
+
+        <div class="col-4" id="sidebar">
+            <div id="blog-categories">
+                <h3>Categories</h3>
+                {% include 'blog/partials/categories.html' %}
+            </div>
+            {% block blog_sidebar %}
+            {% endblock %}
+            {% with all_posts as posts %}
+                <div id="archive">
+                    <h3>Archive</h3>
+                    {% include 'blog/partials/archive_groups.html' %}
+                </div>
+            {% endwith %}
+        </div>
+
+
+
+    </div>
+
+{% endblock %}

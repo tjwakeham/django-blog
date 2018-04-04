@@ -1,0 +1,20 @@
+{% regroup posts by published|date:'Y' as years %}
+<ul>
+    {% for year in years %}
+        <li>
+            <a href="{% url 'post_archive_year' year.grouper %}">
+                {{ year.grouper }} <span class="count">({{ year.list|length }})</span>
+            </a>
+            {% regroup year.list by published|date:'n' as months %}
+            <ul>
+                {% for month in months %}
+                    <li>
+                        <a href="{% url 'post_archive_month' year.grouper month.grouper %}">
+                            {{ month.list.0.published|date:'F' }} <span class="count">({{ month.list|length }})</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+</ul>

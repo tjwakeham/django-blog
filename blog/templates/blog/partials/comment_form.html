@@ -1,0 +1,13 @@
+<form action="{% url 'post_add_comment_to_parent' post.slug parent.id %}" method="post">
+    {% csrf_token %}
+    <div class="row mb-1">
+        <label for="{{ comment_form.content.id_for_label }}" class="col-sm-2">Comment</label>
+        <textarea name="{{ comment_form.content.name }}" id="{{ comment_form.content.id_for_label }}" required class="col"></textarea>
+    </div>
+    <div class="row justify-content-end">
+        <input type="submit" class="col-2">
+        <span class="col-2">
+            <a href="#reply-{{ parent.id }}" data-toggle="collapse">Cancel</a>
+        </span>
+    </div>
+</form>
